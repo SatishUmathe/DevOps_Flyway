@@ -17,7 +17,7 @@ jobs:
       - name: Run Flyway migrations
         uses: red-gate/flyway-action@v2
         with:
-          url: jdbc:sqlserver://${{ secrets.DB_SERVER }};databaseName=PrimePOSDB
+          url: jdbc:sqlserver://${{ secrets.DB_SERVER }};databaseName=devpharmacydashboardapidb
           user: ${{ secrets.DB_USER }}
           password: ${{ secrets.DB_PASS }}
           locations: filesystem:./db/migrations
