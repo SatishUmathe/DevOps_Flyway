@@ -7,19 +7,24 @@ on:
     branches: [ "*" ]
 
 jobs:
-  db-migration:
-    name: Database Migration using Flyway
+  build:
+    name: .NET Build
     runs-on: windows-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Run Flyway migrations
-        uses: red-gate/flyway-action@v2
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
         with:
-          url: jdbc:sqlserver://${{ secrets.DB_SERVER }};databaseName=devpharmacydashboardapidb
-          user: ${{ secrets.DB_USER }}
-          password: ${{ secrets.DB_PASS }}
-          locations: filesystem:./db/migrations
-          command: migrate
+          dotnet-version: 8.0.x  # or 7.0.x / 6.0.x depending on your project
 
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
