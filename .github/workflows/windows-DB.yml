@@ -1,0 +1,23 @@
+name: .NET Build, Test Case Execution and Code Analysis
+ 
+on:
+  push:
+    branches: [ "*" ]
+  pull_request:
+    branches: [ "*" ]
+ 
+jobs:
+  db-migration:
+    name: Database Migration using Flyway
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run Flyway migrations
+        uses: flyway/flyway-action@v2
+        with:
+          url: jdbc:sqlserver://${{ secrets.DB_SERVER }};databaseName=PrimePOSDB
+          user: ${{ secrets.DB_USER }}
+          password: ${{ secrets.DB_PASS }}
+          locations: filesystem:./db/migrations
+          command: migrate
