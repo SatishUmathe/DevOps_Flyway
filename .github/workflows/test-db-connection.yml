@@ -1,0 +1,47 @@
+name: Test Database Connection
+
+on:
+  workflow_dispatch:  # allows you to run manually from GitHub Actions tab
+
+jobs:
+  test-db:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️ Checkout your code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2️ Setup .NET SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # 3️ Create a quick console check
+      - name: Create connection test
+        run: |
+          echo 'using System;
+          using System.Data.SqlClient;
+          class Program {
+              static void Main() {
+                  var connString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+                  using var conn = new SqlConnection(connString);
+                  try {
+                      conn.Open();
+                      Console.WriteLine("✅ Database connection successful!");
+                  } catch (Exception ex) {
+                      Console.WriteLine("❌ Connection failed: " + ex.Message);
+                      Environment.Exit(1);
+                  }
+              }
+          }' > TestDbConnection.cs
+          dotnet new console -n TestDbApp -o testdb
+          mv TestDbConnection.cs testdb/Program.cs
+          cd testdb
+          dotnet add package System.Data.SqlClient
+          dotnet build
+          dotnet run
+
+        env:
+          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
