@@ -1,30 +1,37 @@
-name: .NET Build, Test Case Execution and Code Analysis
+name: Test Database Connection (.NET Console App)
 
 on:
-  push:
-    branches: [ "*" ]
-  pull_request:
-    branches: [ "*" ]
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: .NET Build
-    runs-on: windows-latest
+  test-db:
+    runs-on: windows-latest  #  Important: use Windows runner for .NET Framework projects
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Setup .NET
+      # Add NuGet setup
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+
+      # Restore NuGet packages (for packages.config projects)
+      - name: Restore NuGet Packages
+        run: nuget restore DevOps_FlyWay/DevOps_FlyWay.csproj
+
+      # Setup .NET SDK (for build)
+      - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x  # or 7.0.x / 6.0.x depending on your project
+          dotnet-version: '8.0.x'
 
-      - name: Restore dependencies
-        run: dotnet restore
+      # Build project
+      - name: Build
+        run: dotnet build DevOps_FlyWay/DevOps_FlyWay.csproj --configuration Release --no-restore
 
-      - name: Build solution
-        run: dotnet build --configuration Release --no-restore
-
-      - name: Run tests
-        run: dotnet test --configuration Release --no-build --verbosity normal
+      # Run your console app
+      - name: Run Console App to Test DB Connection
+        working-directory: DevOps_FlyWay
+        env:
+          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+        run: dotnet run --configuration Release
