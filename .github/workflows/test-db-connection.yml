@@ -1,14 +1,14 @@
-name: Test Database Connection
+name: Test Database Connection (.NET Console App)
 
 on:
-  workflow_dispatch:  # allows you to run manually from GitHub Actions tab
+  workflow_dispatch:  # allows manual run from GitHub Actions tab
 
 jobs:
   test-db:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️ Checkout your code
+      # 1️ Checkout your repo
       - name: Checkout Code
         uses: actions/checkout@v4
 
@@ -16,32 +16,21 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '8.0.x'   # or 7.0.x depending on your project
 
-      # 3️ Create a quick console check
-      - name: Create connection test
-        run: |
-          echo 'using System;
-          using System.Data.SqlClient;
-          class Program {
-              static void Main() {
-                  var connString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
-                  using var conn = new SqlConnection(connString);
-                  try {
-                      conn.Open();
-                      Console.WriteLine("✅ Database connection successful!");
-                  } catch (Exception ex) {
-                      Console.WriteLine("❌ Connection failed: " + ex.Message);
-                      Environment.Exit(1);
-                  }
-              }
-          }' > TestDbConnection.cs
-          dotnet new console -n TestDbApp -o testdb
-          mv TestDbConnection.cs testdb/Program.cs
-          cd testdb
-          dotnet add package System.Data.SqlClient
-          dotnet build
-          dotnet run
+      # 3️ Restore dependencies
+      - name: Restore Dependencies
+        working-directory: MyConsoleApp
+        run: dotnet restore
 
+      # 4️ Build your project
+      - name: Build
+        working-directory: MyConsoleApp
+        run: dotnet build --configuration Release --no-restore
+
+      # 5️ Run your console app
+      - name: Run Console App to Test DB Connection
+        working-directory: MyConsoleApp
         env:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
+        run: dotnet run --configuration Release
