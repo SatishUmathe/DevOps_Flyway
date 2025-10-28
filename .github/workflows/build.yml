@@ -1,37 +1,35 @@
-name: Test Database Connection (.NET Console App)
+name: Test DB Connection (.NET Framework)
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:  # Run manually
 
 jobs:
   test-db:
-    runs-on: windows-latest  #  Important: use Windows runner for .NET Framework projects
+    runs-on: windows-latest  #  Must use Windows runner for .NET Framework
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Add NuGet setup
+      # Step 1: Setup NuGet CLI
       - name: Setup NuGet
         uses: nuget/setup-nuget@v2
 
-      # Restore NuGet packages (for packages.config projects)
+      # Step 2: Restore packages (for packages.config-based project)
       - name: Restore NuGet Packages
         run: nuget restore DevOps_FlyWay/DevOps_FlyWay.csproj
 
-      # Setup .NET SDK (for build)
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
+      # Step 3: Setup MSBuild (needed for .NET Framework builds)
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
-      # Build project
+      # Step 4: Build the project
       - name: Build
-        run: dotnet build DevOps_FlyWay/DevOps_FlyWay.csproj --configuration Release --no-restore
+        run: msbuild DevOps_FlyWay/DevOps_FlyWay.csproj /p:Configuration=Release
 
-      # Run your console app
-      - name: Run Console App to Test DB Connection
-        working-directory: DevOps_FlyWay
+      # Step 5: Run your console app to test DB connection
+      - name: Run DB Test App
+        working-directory: DevOps_FlyWay/bin/Release
         env:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
-        run: dotnet run --configuration Release
+        run: DevOps_FlyWay.exe
