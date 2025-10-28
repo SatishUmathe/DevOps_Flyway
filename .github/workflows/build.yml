@@ -1,33 +1,34 @@
 name: Test DB Connection (.NET Framework)
 
 on:
-  workflow_dispatch:  # Run manually
+  workflow_dispatch:
 
 jobs:
   test-db:
-    runs-on: windows-latest  #  Must use Windows runner for .NET Framework
+    runs-on: windows-latest  # ✅ Required for .NET Framework
 
     steps:
-      - name: Checkout Code
+      # 1️⃣ Checkout your repo
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 1: Setup NuGet CLI
+      # 2️⃣ Setup NuGet CLI (to restore old-style packages.config)
       - name: Setup NuGet
         uses: nuget/setup-nuget@v2
 
-      # Step 2: Restore packages (for packages.config-based project)
+      # 3️⃣ Restore packages (for net462 projects)
       - name: Restore NuGet Packages
         run: nuget restore DevOps_FlyWay/DevOps_FlyWay.csproj
 
-      # Step 3: Setup MSBuild (needed for .NET Framework builds)
+      # 4️⃣ Setup MSBuild (instead of dotnet)
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
-      # Step 4: Build the project
+      # 5️⃣ Build your project using MSBuild (not dotnet)
       - name: Build
         run: msbuild DevOps_FlyWay/DevOps_FlyWay.csproj /p:Configuration=Release
 
-      # Step 5: Run your console app to test DB connection
+      # 6️⃣ Run your console app to test DB connection
       - name: Run DB Test App
         working-directory: DevOps_FlyWay/bin/Release
         env:
