@@ -20,6 +20,7 @@ namespace DevOps_FlyWay
                 return;
             }
 
+
             var conn = new SqlConnection(connectionString);
             try
             {
