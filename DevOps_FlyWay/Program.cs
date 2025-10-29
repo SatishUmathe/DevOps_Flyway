@@ -1,9 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
+//using Microsoft.Data.SqlClient;
+
+
+
 
 namespace DevOps_FlyWay
 {
@@ -18,6 +22,7 @@ namespace DevOps_FlyWay
                 Console.WriteLine("❌ No connection string found in environment variables!");
                 return;
             }
+
 
             var conn = new SqlConnection(connectionString);
             try
