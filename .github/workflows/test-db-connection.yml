@@ -18,12 +18,12 @@ jobs:
         uses: nuget/setup-nuget@v2
 
       - name: Restore Packages
-        run: nuget restore ./DevOps_FlyWay/DevOps_FlyWay.csproj
+        run: nuget restore ./DevOps_FlyWay.sln
 
       - name: Build Project
         run: msbuild ./DevOps_FlyWay/DevOps_FlyWay.csproj /p:Configuration=Release
 
-      - name: Run Console App
+      - name: Run App
         working-directory: ./DevOps_FlyWay/bin/Release
         env:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
