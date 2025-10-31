@@ -20,17 +20,17 @@ jobs:
 
       # 3️ Restore dependencies
       - name: Restore Dependencies
-        working-directory: MyConsoleApp
+        working-directory: DevOps_FlyWay
         run: dotnet restore
 
       # 4️ Build your project
       - name: Build
-        working-directory: MyConsoleApp
+        working-directory: DevOps_FlyWay
         run: dotnet build --configuration Release --no-restore
 
       # 5️ Run your console app
       - name: Run Console App to Test DB Connection
-        working-directory: MyConsoleApp
+        working-directory: DevOps_FlyWay
         env:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
         run: dotnet run --configuration Release
