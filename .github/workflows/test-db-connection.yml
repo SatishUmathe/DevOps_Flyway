@@ -1,36 +1,38 @@
-name: Test Database Connection (.NET Console App)
+name: Test Database Connection (.NET Framework Console App)
 
 on:
-  workflow_dispatch:  # allows manual run from GitHub Actions tab
+  workflow_dispatch:  # allows manual run
 
 jobs:
   test-db:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       # 1️ Checkout your repo
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # 2️ Setup .NET SDK
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'   # or 7.0.x depending on your project
+      # 2️ Setup MSBuild (required for .NET Framework)
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
 
-      # 3️ Restore dependencies
+      # 3️ Setup NuGet
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+
+      # 4️ Restore packages
       - name: Restore Dependencies
         working-directory: DevOps_FlyWay
-        run: dotnet restore
+        run: nuget restore DevOps_FlyWay.csproj
 
-      # 4️ Build your project
+      # 5️ Build application
       - name: Build
         working-directory: DevOps_FlyWay
-        run: dotnet build --configuration Release --no-restore
+        run: msbuild DevOps_FlyWay.csproj /p:Configuration=Release
 
-      # 5️ Run your console app
+      # 6️ Run app (Console .NET Framework exe)
       - name: Run Console App to Test DB Connection
-        working-directory: DevOps_FlyWay
+        working-directory: DevOps_FlyWay/bin/Release
         env:
           DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
-        run: dotnet run --configuration Release
+        run: ./DevOps_FlyWay.exe
