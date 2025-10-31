@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
@@ -15,7 +16,7 @@ namespace DevOps_FlyWay
     {
         static void Main(string[] args)
         {
-            var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+            var connectionString = ConfigurationManager.AppSettings["DB_CONNECTION_STRING"];
 
             if (string.IsNullOrEmpty(connectionString))
             {
