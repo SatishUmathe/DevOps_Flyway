@@ -22,12 +22,7 @@ jobs:
 
       - name: Build Project
         run: msbuild ./DevOps_FlyWay/DevOps_FlyWay.csproj /p:Configuration=Release
-
-      # ✅ Install SQL Server before running your exe
-      - name: Setup SQL Server
-        uses: microsoft/setup-sqlserver@v2
-        with:
-          sql-server-version: 2019
+     
 
       # ✅ Create Test DB
       - name: Create Test Database
