@@ -1,41 +1,39 @@
-name: Test Database Connection (.NET Framework Console App)
+name: .NET CI
 
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main ]
 
 jobs:
-  test-db:
-    runs-on: windows-latest
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          SA_PASSWORD: Satish@02
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "exit 0" --health-interval 10s --health-timeout 5s
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-      - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
 
-      - name: Setup NuGet
-        uses: nuget/setup-nuget@v2
+    - name: Restore dependencies
+      run: dotnet restore
 
-      - name: Restore Packages
-        run: nuget restore ./DevOps_FlyWay.sln
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
 
-      - name: Build Project
-        run: msbuild ./DevOps_FlyWay/DevOps_FlyWay.csproj /p:Configuration=Release
-     
-
-      # ✅ Create Test DB
-      - name: Create Test Database
-        run: |
-          sqlcmd -S localhost,1433 -U sa -P "Satish@02" -Q "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name='TestDevOps') CREATE DATABASE TestDevOps;"
-
-      # ✅ (Optional) Test SQL connection
-      - name: Test SQL Service
-        run: sqlcmd -S localhost,1433 -U sa -P "Satish@02" -Q "SELECT DB_NAME(); SELECT @@VERSION;"
-
-      # ✅ Run Your App using CI connection string override
-      - name: Run App
-        working-directory: ./DevOps_FlyWay/bin/Release
-        env:
-          DB_CONNECTION_STRING: ${{ secrets.DB_CONNECTION_STRING }}
-        run: ./DevOps_FlyWay.exe
+    - name: Run DB Test
+      env:
+        ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=YourDatabaseName;User Id=sa;Password=Satish@02;TrustServerCertificate=True;"
+      run: dotnet test
