@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest   # ✅ changed from windows-latest
 
     services:
       sqlserver:
@@ -15,27 +15,36 @@ jobs:
           SA_PASSWORD: Satish@02
         ports:
           - 1433:1433
+        options: >-
+          --health-cmd " /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'Satish@02' -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Wait for SQL Server
         run: |
-          for ($i=1; $i -le 30; $i++) {
-            try {
-              sqlcmd -S sqlserver,1433 -U sa -P "Satish@02" -Q "SELECT 1"
-              if ($LASTEXITCODE -eq 0) { Write-Host "✅ SQL ready"; break }
-            } catch {
-              Write-Host "⏳ Waiting for SQL Server... ($i)"
-              Start-Sleep -Seconds 5
-            }
-          }
+          for i in {1..30}; do
+            /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Satish@02" -Q "SELECT 1" && break
+            echo "⏳ Waiting for SQL Server... ($i)"
+            sleep 5
+          done
 
-      - name: Create Test Database
-        run: sqlcmd -S sqlserver,1433 -U sa -P "Satish@02" -Q "CREATE DATABASE TestDevOps"
+      - name: Create database
+        run: |
+          /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Satish@02" \
+            -Q "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name='TestDevOps') CREATE DATABASE TestDevOps;"
 
-      - name: Restore NuGet Packages
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore NuGet packages
         run: dotnet restore DevOps_FlyWay/DevOps_FlyWay.csproj
 
-      - name: Build Solution
+      - name: Build project
         run: dotnet build DevOps_FlyWay/DevOps_FlyWay.csproj --configuration Release --no-restore
