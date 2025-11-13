@@ -1,4 +1,4 @@
-name: Test SQL Server Connection -1
+name: Build and Test SQL Server Connection
 
 on:
   workflow_dispatch:
@@ -15,28 +15,27 @@ jobs:
           SA_PASSWORD: Satish@02
         ports:
           - 1433:1433
-        options: >-
-          --health-cmd " /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Satish@02' -Q 'SELECT 1' || exit 1"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Wait for SQL Server to start
+      - name: Wait for SQL Server
         run: |
-          echo "Waiting for SQL Server to be ready..."
           for ($i=1; $i -le 30; $i++) {
             try {
-              sqlcmd -S localhost,1433 -U sa -P "Satish@02" -Q "SELECT 1" && break
+              sqlcmd -S sqlserver,1433 -U sa -P "Satish@02" -Q "SELECT 1"
+              if ($LASTEXITCODE -eq 0) { Write-Host "✅ SQL ready"; break }
             } catch {
+              Write-Host "⏳ Waiting for SQL Server... ($i)"
               Start-Sleep -Seconds 5
-              Write-Host "Still waiting... ($i)"
             }
           }
 
-      - name: Create database
-        run: |
-          sqlcmd -S localhost,1433 -U sa -P "Satish@02" -Q "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name='TestDevOps') CREATE DATABASE TestDevOps;"
+      - name: Create Test Database
+        run: sqlcmd -S sqlserver,1433 -U sa -P "Satish@02" -Q "CREATE DATABASE TestDevOps"
+
+      - name: Restore NuGet Packages
+        run: dotnet restore DevOps_FlyWay/DevOps_FlyWay.csproj
+
+      - name: Build Solution
+        run: dotnet build DevOps_FlyWay/DevOps_FlyWay.csproj --configuration Release --no-restore
