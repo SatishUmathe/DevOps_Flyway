@@ -1,8 +1,7 @@
-name: test-db-connection-1
+name: Test SQL Server Connection
 
 on:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -17,46 +16,27 @@ jobs:
         ports:
           - 1433:1433
         options: >-
-          --health-cmd "bash -c '/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Satish@02 -Q \"SELECT 1\" || exit 1'" 
-          --health-interval 10s 
-          --health-timeout 5s 
+          --health-cmd " /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Satish@02' -Q 'SELECT 1' || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
           --health-retries 10
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-
-      - name: Wait for SQL Server to be ready 🕐
-        shell: pwsh
+      - name: Wait for SQL Server to start
         run: |
-          $retries = 30
-          $success = $false
-          for ($i=1; $i -le $retries; $i++) {
-            Write-Host "Checking SQL Server connection... attempt $i of $retries"
-            sqlcmd -S localhost,1433 -U sa -P "Satish@02" -Q "SELECT 1" 2>$null
-            if ($LASTEXITCODE -eq 0) {
-              Write-Host "✅ SQL Server is ready!"
-              $success = $true
-              break
+          echo "Waiting for SQL Server to be ready..."
+          for ($i=1; $i -le 30; $i++) {
+            try {
+              sqlcmd -S localhost,1433 -U sa -P "Satish@02" -Q "SELECT 1" && break
+            } catch {
+              Start-Sleep -Seconds 5
+              Write-Host "Still waiting... ($i)"
             }
-            Start-Sleep -Seconds 5
-          }
-          if (-not $success) {
-            Write-Error "❌ SQL Server did not become ready in time."
-            exit 1
           }
 
-      - name: Create Test Database
+      - name: Create database
         run: |
           sqlcmd -S localhost,1433 -U sa -P "Satish@02" -Q "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name='TestDevOps') CREATE DATABASE TestDevOps;"
-
-      - name: Restore dependencies
-        run: dotnet restore
-
-      - name: Build Project
-        run: dotnet build --configuration Release --no-restore
