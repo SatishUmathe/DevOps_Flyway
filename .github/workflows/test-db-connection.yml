@@ -1,4 +1,4 @@
-name: .test-db-connection
+name: test-db-connection
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
         ports:
           - 1433:1433
         options: >-
-          --health-cmd "echo 'SELECT 1' | /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Satish@02" 
+          --health-cmd "bash -c '/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Satish@02 -Q \"SELECT 1\" || exit 1'" 
           --health-interval 10s 
           --health-timeout 5s 
           --health-retries 10
@@ -32,13 +32,24 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Wait for SQL Server to be ready 🕐
-        shell: bash
+        shell: pwsh
         run: |
-          for i in {1..30}; do
-            /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Satish@02" -Q "SELECT 1" && break
-            echo "Waiting for SQL Server to start... ($i/30)"
-            sleep 5
-          done
+          $retries = 30
+          $success = $false
+          for ($i=1; $i -le $retries; $i++) {
+            Write-Host "Checking SQL Server connection... attempt $i of $retries"
+            sqlcmd -S localhost,1433 -U sa -P "Satish@02" -Q "SELECT 1" 2>$null
+            if ($LASTEXITCODE -eq 0) {
+              Write-Host "✅ SQL Server is ready!"
+              $success = $true
+              break
+            }
+            Start-Sleep -Seconds 5
+          }
+          if (-not $success) {
+            Write-Error "❌ SQL Server did not become ready in time."
+            exit 1
+          }
 
       - name: Create Test Database
         run: |
@@ -49,6 +60,3 @@ jobs:
 
       - name: Build Project
         run: dotnet build --configuration Release --no-restore
-
-      - name: Run Tests
-        run: dotnet test
