@@ -1,4 +1,4 @@
-name: .NET CI
+name: .test-db-connection
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     services:
       sqlserver:
@@ -17,23 +17,38 @@ jobs:
         ports:
           - 1433:1433
         options: >-
-          --health-cmd "exit 0" --health-interval 10s --health-timeout 5s 
+          --health-cmd "echo 'SELECT 1' | /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Satish@02" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 10
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Wait for SQL Server to be ready 🕐
+        shell: bash
+        run: |
+          for i in {1..30}; do
+            /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Satish@02" -Q "SELECT 1" && break
+            echo "Waiting for SQL Server to start... ($i/30)"
+            sleep 5
+          done
 
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
+      - name: Create Test Database
+        run: |
+          sqlcmd -S localhost,1433 -U sa -P "Satish@02" -Q "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name='TestDevOps') CREATE DATABASE TestDevOps;"
 
-    - name: Run DB Test
-      env:
-        ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=YourDatabaseName;User Id=sa;Password=Satish@02;TrustServerCertificate=True;"
-      run: dotnet test
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build Project
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Run Tests
+        run: dotnet test
