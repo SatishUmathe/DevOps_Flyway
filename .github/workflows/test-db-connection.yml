@@ -1,4 +1,4 @@
-name: test-db-connection
+name: test-db-connection-1
 
 on:
   push:
