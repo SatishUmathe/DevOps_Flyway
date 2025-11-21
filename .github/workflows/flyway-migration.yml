@@ -1,4 +1,4 @@
-name: Flyway Migration New Update
+name: Flyway Migration New Update-1
 
 on:
   workflow_dispatch:
@@ -9,26 +9,29 @@ jobs:
 
     services:
       sqlserver:
-        image: mcr.microsoft.com/mssql/server:2019-latest
+        image: mcr.microsoft.com/mssql/server:2017-latest
         env:
           SA_PASSWORD: "Satish@02"
           ACCEPT_EULA: "Y"
+          MSSQL_PID: "Express"
         ports:
           - 1433:1433
         options: >-
-          --health-cmd="/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Satish@02' -Q 'SELECT 1'"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=10
+          --name sqlserver
+          --hostname sql1
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Wait for SQL Server to be available
+      - name: Wait for SQL Server to fully start (retry loop)
         run: |
           echo "Waiting for SQL Server to start..."
-          sleep 25
+          for i in {1..40}; do
+            /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Satish@02" -Q "SELECT 1" && break
+            echo "SQL not ready yet... retrying ($i/40)"
+            sleep 3
+          done
 
       - name: Create DevopsTest database if not exists
         run: |
