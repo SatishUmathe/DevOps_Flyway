@@ -3,35 +3,52 @@ name: Flyway Migration
 on:
   workflow_dispatch:
 
-  push:
-    branches: 
-      - main
-
 jobs:
-  flyway-migration:
-    runs-on: windows-latest   # MUST be Windows if connecting to your local/on-prem SQL for test
+  flyway_migration:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        env:
+          SA_PASSWORD: "Satish@02"
+          ACCEPT_EULA: "Y"
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd="/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P 'Satish@02' -Q 'SELECT 1'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Download Flyway
+      - name: Wait for SQL Server to be available
         run: |
-          curl -L https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/10.9.1/flyway-commandline-10.9.1-windows-x64.zip -o flyway.zip
-          tar -xf flyway.zip
-          ren flyway-10.9.1 flyway
+          echo "Waiting for SQL Server to start..."
+          sleep 25
 
-      - name: Run Flyway Migrations
-        env:
-          FLYWAY_URL: jdbc:sqlserver://192.168.0.88:54608;databaseName=master;encrypt=false
-          FLYWAY_USER: sa
-          FLYWAY_PASSWORD: MMSPhW110
-
+      - name: Create DevopsTest database if not exists
         run: |
-          flyway\flyway migrate `
-            -url="%FLYWAY_URL%" `
-            -user="%FLYWAY_USER%" `
-            -password="%FLYWAY_PASSWORD%" `
-            -locations=filesystem:./sql
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Satish@02" -Q "
+          IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = 'DevopsTest')
+          BEGIN
+              CREATE DATABASE DevopsTest;
+          END
+          "
 
+      - name: Install Flyway
+        run: |
+          wget -qO- https://download.red-gate.com/maven/flyway-commandline-latest-linux-x64.tar.gz | tar xvz
+          sudo ln -s `pwd`/flyway-*/flyway /usr/local/bin/flyway
 
+      - name: Run Flyway Migration
+        run: |
+          flyway \
+            -url="jdbc:sqlserver://localhost:1433;databaseName=DevopsTest" \
+            -user=sa \
+            -password="Satish@02" \
+            -locations=filesystem:./sql \
+            migrate
