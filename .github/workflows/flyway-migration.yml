@@ -1,4 +1,4 @@
-name: Flyway Migration
+name: Flyway Migration New Update
 
 on:
   workflow_dispatch:
