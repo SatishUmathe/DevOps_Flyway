@@ -7,7 +7,7 @@ on:
 
 jobs:
   flyway-migration:
-    runs-on: windows-latest   # MUST be Windows if connecting to your local/on-prem SQL
+    runs-on: windows-latest   # MUST be Windows if connecting to your local/on-prem SQL for test
 
     steps:
       - name: Checkout Repository
