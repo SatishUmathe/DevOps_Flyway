@@ -32,3 +32,4 @@ jobs:
             -password="%FLYWAY_PASSWORD%" `
             -locations=filesystem:./sql
 
+
