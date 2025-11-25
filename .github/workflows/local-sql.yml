@@ -1,0 +1,32 @@
+name: Run Local SQL Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-local-sql:
+    runs-on: self-hosted     # IMPORTANT → runs on your PC, not GitHub server
+
+    env:
+      DB_SERVER: "localhost,1433"
+      DB_NAME: "Test"
+      DB_USER: "sa"
+      DB_PASSWORD: "Satish@02"
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # OPTIONAL: Run SQL script directly using sqlcmd
+      - name: Run SQL Script
+        run: |
+          sqlcmd -S $env:DB_SERVER -d $env:DB_NAME -U $env:DB_USER -P $env:DB_PASSWORD -i "./sql/init.sql"
+
+      # OPTIONAL: Flyway migration block
+      - name: Flyway Migration
+        uses: flyway/flyway-action@v3
+        with:
+          url: jdbc:sqlserver://localhost,1433;databaseName=Test
+          user: sa
+          password: Satish@02
+          locations: filesystem:./sql
