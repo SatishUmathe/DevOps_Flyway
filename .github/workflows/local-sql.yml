@@ -20,7 +20,7 @@ jobs:
       # OPTIONAL: Run SQL script directly using sqlcmd
       - name: Run SQL Script
         run: |
-          sqlcmd -S $env:DB_SERVER -d $env:DB_NAME -U $env:DB_USER -P $env:DB_PASSWORD -i "./sql/init.sql"
+          sqlcmd -S $env:DB_SERVER -d $env:DB_NAME -U $env:DB_USER -P $env:DB_PASSWORD -i "./SQL/V1__init.sql"
 
       # OPTIONAL: Flyway migration block
       - name: Flyway Migration
