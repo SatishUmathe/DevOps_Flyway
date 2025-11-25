@@ -8,7 +8,7 @@ jobs:
     runs-on: self-hosted     # IMPORTANT → runs on your PC, not GitHub server
 
     env:
-      DB_SERVER: "localhost\\SQLEXPRESS"
+      DB_SERVER: "localhost"
       DB_NAME: "Test"
       DB_USER: "sa"
       DB_PASSWORD: "Satish@02"
@@ -26,7 +26,7 @@ jobs:
       - name: Flyway Migration
         uses: flyway/flyway-action@v3
         with:
-          url: jdbc:sqlserver://localhost\\SQLEXPRESS;databaseName=Test
+          url: jdbc:sqlserver://localhost;instanceName=SQLEXPRESS;databaseName=Test
           user: sa
           password: Satish@02
-          locations: filesystem:./sql
+          locations: filesystem:./SQL
