@@ -5,7 +5,7 @@ on:
 
 jobs:
   run-local-sql:
-    runs-on: self-hosted     # IMPORTANT → runs on your PC, not GitHub server
+    runs-on: ubuntu-latest     # IMPORTANT → runs on your PC, not GitHub server
 
     env:
       DB_SERVER: "192.168.0.253,1433"
