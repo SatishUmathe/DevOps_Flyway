@@ -1,50 +1,13 @@
-name: Build and Test SQL Server Connection
+name: SQL Connection Check
 
 on:
-  workflow_dispatch:
+  workflow_dispatch
 
 jobs:
-  build:
-    runs-on: ubuntu-latest   # ✅ changed from windows-latest
-
-    services:
-      sqlserver:
-        image: mcr.microsoft.com/mssql/server:2022-latest
-        env:
-          ACCEPT_EULA: Y
-          SA_PASSWORD: Satish@02
-        ports:
-          - 1433:1433
-        options: >-
-          --health-cmd " /opt/mssql-tools18/bin/sqlcmd -S 192.168.0.253,1433 -U sa -P 'Satish@02' -Q 'SELECT 1'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 10
+  check-sql:
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Wait for SQL Server
+      - name: Check SQL Server connection (Windows Auth)
         run: |
-          for i in {1..30}; do
-            /opt/mssql-tools18/bin/sqlcmd -S 192.168.0.253,1433 -U sa -P "Satish@02" -Q "SELECT 1" && break
-            echo "⏳ Waiting for SQL Server... ($i)"
-            sleep 5
-          done
-
-      - name: Create database
-        run: |
-          /opt/mssql-tools18/bin/sqlcmd -S 192.168.0.253,1433 -U sa -P "Satish@02" \
-            -Q "IF NOT EXISTS(SELECT * FROM sys.databases WHERE name='TestDevOps') CREATE DATABASE TestDevOps;"
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-
-      - name: Restore NuGet packages
-        run: dotnet restore DevOps_FlyWay/DevOps_FlyWay.csproj
-
-      - name: Build project
-        run: dotnet build DevOps_FlyWay/DevOps_FlyWay.csproj --configuration Release --no-restore
+          sqlcmd -S localhost -d master -E -Q "SELECT GETDATE()"
