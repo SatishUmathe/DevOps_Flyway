@@ -1,7 +1,7 @@
 name: SQL Connection Check
 
 on:
-  workflow_dispatch
+  workflow_dispatch 
 
 jobs:
   check-sql:
