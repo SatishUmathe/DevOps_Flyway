@@ -1,13 +1,23 @@
-name: SQL Connection Check
+name: SQL Connection Test (TEMP)
 
 on:
-  workflow_dispatch 
+  workflow_dispatch
 
 jobs:
-  check-sql:
-    runs-on: self-hosted
+  test-sql:
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Check SQL Server connection (Windows Auth)
+      - name: Install sqlcmd
         run: |
-          sqlcmd -S localhost -d master -E -Q "SELECT GETDATE()"
+          sudo apt-get update
+          sudo apt-get install -y mssql-tools unixodbc-dev
+
+      - name: Test SQL Connection
+        run: |
+          sqlcmd \
+          -S 192.168.0.253,1433 \
+          -d master \
+          -U sa \
+          -P Satish@02 \
+          -Q "SELECT GETDATE()"
