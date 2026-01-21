@@ -19,7 +19,7 @@ jobs:
           sqlcmd `
             -S "${{ secrets.DB_SERVER }}" `
             -U sa `
-            -P "Satish@02" `
+            -P "${{ secrets.DB_PASSWORD }}" `
             -d master `
             -Q "IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='master')
                 BEGIN
