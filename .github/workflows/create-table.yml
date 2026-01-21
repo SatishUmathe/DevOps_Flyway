@@ -17,7 +17,7 @@ jobs:
       - name: Create table in SQL Server
         run: |
           sqlcmd `
-            -S 103.78.168.218,1433 `
+            -S "${{ secrets.DB_SERVER }}" `
             -U sa `
             -P "Satish@02" `
             -d master `
