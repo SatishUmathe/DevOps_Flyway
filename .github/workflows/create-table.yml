@@ -21,7 +21,7 @@ jobs:
             -U sa `
             -P "Satish@02" `
             -d TestDatabase `
-            -Q "IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='TestTable')
+            -Q "IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='master')
                 BEGIN
                   CREATE TABLE TestTable (
                     Id INT IDENTITY(1,1) PRIMARY KEY,
