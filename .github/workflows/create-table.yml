@@ -20,7 +20,7 @@ jobs:
             -S 103.78.168.218,1433 `
             -U sa `
             -P "Satish@02" `
-            -d TestDatabase `
+            -d master `
             -Q "IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='master')
                 BEGIN
                   CREATE TABLE TestTable (
