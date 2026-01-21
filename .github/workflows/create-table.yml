@@ -23,7 +23,7 @@ jobs:
             -d master `
             -Q "IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='master')
                 BEGIN
-                  CREATE TABLE TestTable (
+                  CREATE TABLE TestTable_a (
                     Id INT IDENTITY(1,1) PRIMARY KEY,
                     Name NVARCHAR(100),
                     CreatedDate DATETIME DEFAULT GETDATE()
