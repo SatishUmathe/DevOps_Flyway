@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest     # IMPORTANT → runs on your PC, not GitHub server
 
     env:
-      DB_SERVER: "192.168.0.253,1433"
+      DB_SERVER: "103.78.168.218:1433"
       DB_NAME: "master"
       DB_USER: "sa"
       DB_PASSWORD: "Satish@02"
@@ -26,7 +26,7 @@ jobs:
       - name: Flyway Migration
         uses: flyway/flyway-action@v3
         with:
-          url: jdbc:sqlserver://192.168.0.253,1433;databaseName=master
+          url: jdbc:sqlserver://103.78.168.218:1433;databaseName=master
           user: sa
           password: Satish@02
           locations: filesystem:./SQL
