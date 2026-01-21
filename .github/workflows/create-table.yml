@@ -16,17 +16,17 @@ jobs:
           choco install sqlcmd -y
 
       - name: Create table in SQL Server
-        run: |
-          sqlcmd ^
-            -S 103.78.168.218,1433 ^
-            -U sa ^
-            -P "Satish@02" ^
-            -d TestDatabase ^
-            -Q "IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='TestTable')
-                BEGIN
-                  CREATE TABLE TestTable (
-                    Id INT IDENTITY(1,1) PRIMARY KEY,
-                    Name NVARCHAR(100),
-                    CreatedDate DATETIME DEFAULT GETDATE()
-                  )
-                END"
+      run: |
+          sqlcmd `
+      -S 103.78.168.218,1433 `
+      -U sa `
+      -P "Satish@02" `
+      -d TestDatabase `
+      -Q "IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='TestTable')
+          BEGIN
+            CREATE TABLE TestTable (
+              Id INT IDENTITY(1,1) PRIMARY KEY,
+              Name NVARCHAR(100),
+              CreatedDate DATETIME DEFAULT GETDATE()
+            )
+          END"
