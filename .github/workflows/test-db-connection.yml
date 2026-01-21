@@ -16,7 +16,7 @@ jobs:
       - name: Test SQL Connection
         run: |
           sqlcmd \
-          -S 192.168.0.253,1433 \
+          -S 103.78.168.218:1433 \
           -d master \
           -U sa \
           -P Satish@02 \
