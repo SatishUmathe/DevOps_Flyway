@@ -1,0 +1,32 @@
+name: Create SQL Server Table (Test)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-table:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install sqlcmd
+        run: |
+          choco install sqlcmd -y
+
+      - name: Create table in SQL Server
+        run: |
+          sqlcmd ^
+            -S 103.78.168.218,1433 ^
+            -U sa ^
+            -P "Satish@02" ^
+            -d TestDatabase ^
+            -Q "IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='TestTable')
+                BEGIN
+                  CREATE TABLE TestTable (
+                    Id INT IDENTITY(1,1) PRIMARY KEY,
+                    Name NVARCHAR(100),
+                    CreatedDate DATETIME DEFAULT GETDATE()
+                  )
+                END"
