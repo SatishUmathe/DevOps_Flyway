@@ -1,0 +1,24 @@
+name: Create SQL Server Table (From SQL File)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-table:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install sqlcmd
+        run: choco install sqlcmd -y
+
+      - name: Run SQL file
+        shell: pwsh
+        run: |
+          sqlcmd -S "${{ secrets.DB_SERVER }}" `
+                 -U "sa" `
+                 -P "${{ secrets.DB_PASSWORD }}" `
+                 -d "master" `
+                 -i "SQL/create_table.sql"
