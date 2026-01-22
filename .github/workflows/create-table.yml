@@ -18,12 +18,12 @@ jobs:
         run: |
           sqlcmd `
             -S "${{ secrets.DB_SERVER }}" `
-            -U sa `
-            -P Satish@02 `
+            -U "${{ secrets.DB_USER }}" `
+            -P "${{ secrets.DB_PASSWORD }}" `
             -d master `
             -Q "IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='master')
                 BEGIN
-                  CREATE TABLE TestTable_C (
+                  CREATE TABLE TestTable_D (
                     Id INT IDENTITY(1,1) PRIMARY KEY,
                     Name NVARCHAR(100),
                     CreatedDate DATETIME DEFAULT GETDATE()
