@@ -17,8 +17,9 @@ jobs:
       - name: Run SQL file
         shell: pwsh
         run: |
-          sqlcmd -S "${{ secrets.DB_SERVER }}" `
-                 -U "sa" `
-                 -P "${{ secrets.DB_PASSWORD }}" `
-                 -d "master" `
-                 -i "SQL/create_table.sql"
+          sqlcmd `
+            -S "${{ secrets.DB_SERVER }}" `
+            -U "${{ secrets.DB_USER }}" `
+            -P "${{ secrets.DB_PASSWORD }}" `
+            -d master `
+            -i "SQL/create_table.sql"
