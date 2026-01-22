@@ -17,13 +17,13 @@ jobs:
       - name: Create table in SQL Server
         run: |
           sqlcmd `
-            -S 103.78.168.218,1433 `
+            -S "${{ secrets.DB_SERVER }}" `
             -U sa `
             -P Satish@02 `
             -d master `
             -Q "IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name='master')
                 BEGIN
-                  CREATE TABLE TestTable_B (
+                  CREATE TABLE TestTable_C (
                     Id INT IDENTITY(1,1) PRIMARY KEY,
                     Name NVARCHAR(100),
                     CreatedDate DATETIME DEFAULT GETDATE()
