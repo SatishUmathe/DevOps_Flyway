@@ -1,4 +1,4 @@
-name: Create SQL Server Table (From SQL File)
+name: Create SQL Server DB & Table (From SQL File)
 
 on:
   workflow_dispatch:
