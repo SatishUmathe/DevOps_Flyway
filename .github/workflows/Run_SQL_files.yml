@@ -13,13 +13,25 @@ jobs:
 
       - name: Install sqlcmd
         run: choco install sqlcmd -y
-
-      - name: Run SQL file
+        
+# Step 1: Create Database
+      - name: Create Database
         shell: pwsh
         run: |
           sqlcmd `
             -S "${{ secrets.DB_SERVER }}" `
             -U "${{ secrets.DB_USER }}" `
             -P "${{ secrets.DB_PASSWORD }}" `
-            -d master `
-            -i "SQL/create_table.sql"
+            -d  `
+            -i "sql/01_create_database.sql"
+
+# Step 2: Create Tables
+      - name: Create Tables
+        shell: pwsh
+        run: |
+          sqlcmd `
+            -S "${{ secrets.DB_SERVER }}" `
+            -U "${{ secrets.DB_USER }}" `
+            -P "${{ secrets.DB_PASSWORD }}" `
+            -d  `
+            -i "sql/02_create_tables.sql"
