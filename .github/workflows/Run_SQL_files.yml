@@ -33,5 +33,5 @@ jobs:
             -S "${{ secrets.DB_SERVER }}" `
             -U "${{ secrets.DB_USER }}" `
             -P "${{ secrets.DB_PASSWORD }}" `
-            -d  TestDB`
+            -d  TestDB `
             -i "sql/02_create_tables.sql"
