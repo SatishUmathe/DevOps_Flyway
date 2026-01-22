@@ -22,7 +22,7 @@ jobs:
             -S "${{ secrets.DB_SERVER }}" `
             -U "${{ secrets.DB_USER }}" `
             -P "${{ secrets.DB_PASSWORD }}" `
-            -d  `
+            -d master `
             -i "sql/01_create_database.sql"
 
 # Step 2: Create Tables
@@ -33,5 +33,5 @@ jobs:
             -S "${{ secrets.DB_SERVER }}" `
             -U "${{ secrets.DB_USER }}" `
             -P "${{ secrets.DB_PASSWORD }}" `
-            -d  `
+            -d  TestDB`
             -i "sql/02_create_tables.sql"
